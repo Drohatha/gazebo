@@ -89,7 +89,7 @@ void roombaCallback(const geometry_msgs::PoseStamped& input) {
 }
 
 bool closeEnough(float x, float y, float z){
-	if(abs(position_quad.x - x) < 0.1 && abs(position_quad.y - y) < 0.1 && abs(position_quad.z - z) < 0.1 ){
+	if(fabs(position_quad.x - x) < 0.1 && fabs(position_quad.y - y) < 0.1 && fabs(position_quad.z - z) < 0.1 ){
 		float temp2 = position_quad.z - z; 
 		float temp = abs(temp2); 
 		ROS_INFO("I am true %f and: %f and abs: %f and z -z: %f", position_quad.z, z, temp, temp2 );  
