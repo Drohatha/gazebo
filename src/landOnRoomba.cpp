@@ -13,8 +13,8 @@
 // Defining constants
 constexpr float PI_HALF = 1.570796; 
 constexpr float tracking_speed = 2.7; //m/s
-constexpr float descend_speed = 0.7; //m/s
-constexpr float delta_p = 1.5; // Tuning parameter 
+constexpr float descend_speed = 0.4; //m/s
+constexpr float delta_p = 1.0; // Tuning parameter 
 
 uint16_t velocity_control = IGNORE_PX | IGNORE_PY | IGNORE_PZ |
 	                    IGNORE_AFX | IGNORE_AFY | IGNORE_AFZ | 
@@ -52,13 +52,16 @@ void roombaInterception(){
 	distance.x = position_roomba.x - position_quad.x; 
 	distance.y = position_roomba.y - position_quad.y; 
 	distance.z = position_roomba.z - position_quad.z; 
-
+	// Bearing guidance in three dimentions
 	float inner_product = pow(distance.x,2) + pow(distance.y, 2) + pow(distance.z,2);
 	float interception_gain = tracking_speed/sqrt(pow(delta_p,2) + inner_product); 
+	//In the z direction the interception gain will increase when d_x and d_y - > 0  
+	float inner_product_z = inner_product - pow(distance.z,2); 
+	float interception_gain_z = descend_speed/sqrt(pow(delta_p,2) + inner_product); 
 
 	setpoint.velocity.x = interception_gain * distance.x + velocity_roomba.x;
 	setpoint.velocity.y = interception_gain * distance.y + velocity_roomba.y;
-	setpoint.velocity.z = interception_gain * distance.z + velocity_roomba.z; 
+	setpoint.velocity.z = interception_gain_z * distance.z + velocity_roomba.z; 
 
 	setpoint.yaw = -PI_HALF; 
 	setpoint.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
@@ -99,9 +102,9 @@ bool closeEnough(float x, float y, float z){
 void takeOff(float x, float y, float z){
 	setpoint.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
 	setpoint.type_mask = position_control | SETPOINT_TYPE_TAKEOFF;
-	setpoint.position.z = 1;
-	setpoint.position.x = 0;
-	setpoint.position.y = 0;				
+	setpoint.position.z = z;
+	setpoint.position.x = x;
+	setpoint.position.y = y;				
 	setpoint.header.frame_id = "fcu";
 	setpoint.yaw = -PI_HALF;
 	setpoint_pub.publish(setpoint); 
@@ -124,8 +127,8 @@ int main(int argc, char **argv){
 
 		switch (state){
 			case takeoff:
-				takeOff(0,0,1); 
-				if(closeEnough(0,0,1)){
+				takeOff(0,0,2); 
+				if(closeEnough(0,0,2)){
 					state = landOnRoomba; 
 				}
 				break; 
