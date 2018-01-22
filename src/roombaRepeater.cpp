@@ -16,9 +16,9 @@ int main(int argc, char **argv){
 	ros::Rate loop_rate(30); 
 
 	// The motioncapture dont have same coordinate system as the quad
-	position_roomba.x = 5.0;  // In quad coor = x
+	position_roomba.x = 1.0;  // In quad coor = x
 	position_roomba.y = 0.0;  // in quad coor = -z
-	position_roomba.z = 4.0;  // In quad coor = -y 
+	position_roomba.z = -1.0;  // In quad coor = -y 
 
 	while(ros::ok()){
 		roomba_pose.header.stamp = ros::Time::now(); 

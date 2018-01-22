@@ -90,19 +90,15 @@ void roombaCallback(const geometry_msgs::PoseStamped& input) {
 
 bool closeEnough(float x, float y, float z){
 	if(fabs(position_quad.x - x) < 0.1 && fabs(position_quad.y - y) < 0.1 && fabs(position_quad.z - z) < 0.1 ){
-		float temp2 = position_quad.z - z; 
-		float temp = abs(temp2); 
-		ROS_INFO("I am true %f and: %f and abs: %f and z -z: %f", position_quad.z, z, temp, temp2 );  
 		return true;
 	}else{
-		ROS_INFO("I am false %f and: %f ", position_quad.z, z); 
 		return false; 
 	}
 }
 
 void takeOff(float x, float y, float z){
 	setpoint.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
-	setpoint.type_mask = position_control;
+	setpoint.type_mask = position_control | SETPOINT_TYPE_TAKEOFF;
 	setpoint.position.z = 1;
 	setpoint.position.x = 0;
 	setpoint.position.y = 0;				
@@ -140,8 +136,6 @@ int main(int argc, char **argv){
 				}
 				break; 
 		}
-
-
 		ros::spinOnce();
 		
 		loop_rate.sleep();
