@@ -12,9 +12,10 @@
 
 // Defining constants
 constexpr float PI_HALF = 1.570796; 
-constexpr float tracking_speed = 2.7; //m/s
-constexpr float descend_speed = 0.4; //m/s
+constexpr float tracking_speed = 2.0; //m/s
+constexpr float descend_speed = 0.5; //m/s
 constexpr float delta_p = 1.0; // Tuning parameter 
+constexpr float K = 50; // Tuning param
 
 uint16_t velocity_control = IGNORE_PX | IGNORE_PY | IGNORE_PZ |
 	                    IGNORE_AFX | IGNORE_AFY | IGNORE_AFZ | 
@@ -57,7 +58,8 @@ void roombaInterception(){
 	float interception_gain = tracking_speed/sqrt(pow(delta_p,2) + inner_product); 
 	//In the z direction the interception gain will increase when d_x and d_y - > 0  
 	float inner_product_z = inner_product - pow(distance.z,2); 
-	float interception_gain_z = descend_speed/sqrt(pow(delta_p,2) + inner_product); 
+	float interception_gain_z = descend_speed/sqrt(pow(delta_p,2) + K*inner_product_z);
+	ROS_DEBUG("Interception gain: %f", interception_gain_z); 
 
 	setpoint.velocity.x = interception_gain * distance.x + velocity_roomba.x;
 	setpoint.velocity.y = interception_gain * distance.y + velocity_roomba.y;
