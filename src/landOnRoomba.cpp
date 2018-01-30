@@ -14,9 +14,9 @@
 constexpr float PI_HALF = 1.570796; 
 
 constexpr float tracking_speed = 2.0; //m/s
-constexpr float descend_speed = 0.5; //m/s
+constexpr float descend_speed = 0.1; //m/s
 
-constexpr float delta_p = 1.0; // Tuning parameter 
+constexpr float delta_p = 2.0; // Tuning parameter 
 constexpr float delta_p_z = 0.01; // Tuning parameter
 
 uint16_t velocity_control = IGNORE_PX | IGNORE_PY | IGNORE_PZ |
@@ -55,13 +55,17 @@ void roombaInterception(){
 	distance.x = position_roomba.x - position_quad.x; 
 	distance.y = position_roomba.y - position_quad.y; 
 	distance.z = position_roomba.z - position_quad.z; 
+	
+
 	// Bearing guidance in three dimentions
-	float inner_product = pow(distan ce.x,2) + pow(distance.y, 2) + pow(distance.z,2);
+	float inner_product = pow(distance.x,2) + pow(distance.y, 2);  //+ pow(distance.z,2);
 	float interception_gain = tracking_speed/sqrt(pow(delta_p,2) + inner_product); 
 	//In the z direction the interception gain will increase when d_x and d_y - > 0  
-	float inner_product_z = inner_product - pow(distance.z,2); 
-	float interception_gain_z = descend_speed/sqrt(pow(delta_p_z,2) + inner_product_z);
-	ROS_DEBUG("Interception gain: %f", interception_gain_z); 
+	//float inner_product_z = inner_product - pow(distance.z,2); 
+	float interception_gain_z = descend_speed/sqrt(pow(delta_p_z,2) + inner_product);
+	
+
+	//ROS_DEBUG("Interception gain: %f", interception_gain_z); 
 
 	setpoint.velocity.x = interception_gain * distance.x + velocity_roomba.x;
 	setpoint.velocity.y = interception_gain * distance.y + velocity_roomba.y;
@@ -96,7 +100,7 @@ void roombaCallback(const geometry_msgs::PoseStamped& input) {
 }
 
 bool closeEnough(float x, float y, float z){
-	if(fabs(position_quad.x - x) < 0.1 && fabs(position_quad.y - y) < 0.1 && fabs(position_quad.z - z) < 0.1 ){
+	if(fabs(position_quad.x - x) < 0.2 && fabs(position_quad.y - y) < 0.2 && fabs(position_quad.z - z) < 0.1 ){
 		return true;
 	}else{
 		return false; 
